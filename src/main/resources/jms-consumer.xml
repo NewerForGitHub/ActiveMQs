@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<!--这个是队列目的地 -->
+	<bean id="queueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg>
+			<value>queue</value>
+		</constructor-arg>
+	</bean>
+	<!--这个是主题目的地，一对多的 -->
+	<bean id="topicDestination" class="org.apache.activemq.command.ActiveMQTopic">
+		<constructor-arg value="topic" />
+	</bean>
+	<!-- 消息监听器 -->
+	<bean id="consumerMessageListener" class="com.my.activemq.consumer.ConsumerMessageListener" />
+
+	<!-- 消息监听容器 -->
+	<!-- 配置MessageListenerContainer时必须指定三个属性: 表示从哪里监听的ConnectionFactory； 表示监听什么的Destination； 
+		接收到消息以后进行消息处理的MessageListener -->
+	<!-- Spring提供了两种类型的MessageListenerContainer: SimpleMessageListenerContainer:会在一开始的时候就创建一个会话session和消费者Consumer，并且会使用标准的JMS 
+		MessageConsumer.setMessageListener()方法注册监听器让JMS提供者调用监听器的回调函数。它不会动态的适应运行时需要和参与外部的事务管理。兼容性方面，它非常接近于独立的JMS规范，但一般不兼容Java 
+		EE的JMS限制。 DefaultMessageListenerContainer:大多数情况下使用，会动态的适应运行时需要，并且能够参与外部的事务管理。它很好的平衡了对JMS提供者要求低、先进功能如事务参与和兼容Java 
+		EE环境。 -->
+	<bean id="jmsContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="destination" ref="queueDestination" />
+		<property name="messageListener" ref="consumerMessageListener" />
+	</bean>
+</beans>
